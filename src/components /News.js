@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import NewsUpdate from './NewsUpdate.js'
 import Spinner from './Spinner.js';
+import PropTypes from 'prop-types'
 
 export class News extends Component {
   // articles = [
@@ -1305,6 +1306,15 @@ export class News extends Component {
   //     "content": "BANGKOK (Reuters) - Thailand's Prime Minister Srettha Thavisin said on Sunday the country expected to receive investment of at least $5 billion from Tesla, Google and Microsoft.\r\n \"Tesla would be loo… [+989 chars]"
   //   }
   // ]
+
+  static defaultProps = {
+    category: "general",
+  }
+
+  static propTypes ={
+    category : PropTypes.string, 
+  }
+
   constructor() {
     super();
     this.state = {
@@ -1315,37 +1325,53 @@ export class News extends Component {
     }
   }
 
-  async componentDidMount() {
-    let url = "https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=075188bc970d47948ed55b884f2a64ef&page=1&pageSize=12"
+  async updateNews(){
+    const url =`https://newsapi.org/v2/top-headlines?&language=en&category=${this.props.category}&apiKey=075188bc970d47948ed55b884f2a64ef&page=${this.state.page }&pageSize=12`
     let data = await fetch(url);
-    let parsedData = await data.json()
-    this.setState({ articles: parsedData.articles })
+    let parsedData=await data.json()
+    this.setState({
+      page: this.state.page, 
+      articles: parsedData.articles,
+      totalResults: parsedData.totalResults,
+    })
+  }
+
+  async componentDidMount() {
+    // let url = `https://newsapi.org/v2/top-headlines?&language=en&category=${this.props.category}&apiKey=075188bc970d47948ed55b884f2a64ef&page=1&pageSize=12`
+    // let data = await fetch(url);
+    // let parsedData = await data.json()
+    // this.setState({ articles: parsedData.articles })
+    this.updateNews();
   }
 
 
 
   nextclick = async () => {
-    let url = `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=075188bc970d47948ed55b884f2a64ef&page=${this.state.page + 1}&pageSize=12`
-    this.setState({ loading: true });
-    let data = await fetch(url);
-    let parsedData = await data.json()
-    this.setState({
-      page: this.state.page - 1,
-      articles: parsedData.articles,
-      loading: false,
-    })
+    // let url = `https://newsapi.org/v2/top-headlines?&language=en&category=${this.props.category}&apiKey=075188bc970d47948ed55b884f2a64ef&page=${this.state.page + 1}&pageSize=12`
+    // this.setState({ loading: true });
+    // let data = await fetch(url);
+    // let parsedData = await data.json()
+    // this.setState({
+    //   page: this.state.page + 1,
+    //   articles: parsedData.articles,
+    //   loading: false,
+    // })
+    this.setState({page: this.state.page+1}); 
+    this.updateNews();
   }
 
   previousclick = async () => {
-    let url = `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=075188bc970d47948ed55b884f2a64ef&page=${this.state.page - 1}&pageSize=12`
-    this.setState({ loading: true });
-    let data = await fetch(url)
-    let parsedData = await data.json()
-    this.setState({
-      page: this.state.page - 1,
-      articles: parsedData.articles,
-      loading: false 
-    })
+    // let url = `https://newsapi.org/v2/top-headlines?&language=en&category=${this.props.category}&apiKey=075188bc970d47948ed55b884f2a64ef&page=${this.state.page - 1}&pageSize=12`
+    // this.setState({ loading: true });
+    // let data = await fetch(url)
+    // let parsedData = await data.json()
+    // this.setState({
+    //   page: this.state.page - 1,
+    //   articles: parsedData.articles,
+    //   loading: false 
+    // })
+    this.setState({page: this.state.page-1}); 
+    this.updateNews();
   }
 
   render() {
@@ -1363,10 +1389,12 @@ export class News extends Component {
         <div className='row'>
           {this.state.articles.map((element) => {
             return <div className='col-md-4' key={element.url}>
-              <NewsUpdate title={element.title} newsurl={element.url} description={element.description?.slice(0,100)} imageUrl={element.urlToImage} />
+              <NewsUpdate title={element.title} newsurl={element.url} imageUrl={element.urlToImage} author={element.author} source={element.source.name}/>
             </div>
           })}
         </div>
+
+        {/* prev and next button in below  */}
         {this.state.loading && <Spinner />}
         <div className='container d-flex justify-content-between'>
           {/* stating the condition disable if page <=1  */}
